@@ -15,3 +15,15 @@ variable "bedrock_role_name" {
   type        = string
   default     = "bedrock-kb-access-demo"
 }
+
+variable "github_repo_url" {
+  description = "GitHub URL of this repo, cloned onto the EC2 instance at boot"
+  type        = string
+  default     = "https://github.com/Anshuljn087/aws-doc-agent.git"
+}
+
+variable "kb_id" {
+  description = "Bedrock Knowledge Base ID used by the FastAPI backend"
+  type        = string
+  default     = "AQJ8REZKK9"
+}
