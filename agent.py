@@ -18,7 +18,7 @@ load_dotenv(dotenv_path=PROJECT_ROOT / ".env")
 
 AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
 KB_ID = os.getenv("KB_ID")
-MODEL_ID = os.getenv("MODEL_ID", "anthropic.claude-sonnet-4-5-20250929-v1:0")
+MODEL_ID = os.getenv("MODEL_ID", "us.anthropic.claude-sonnet-4-5-20250929-v1:0")
 
 bedrock_runtime = boto3.client("bedrock-runtime", region_name=AWS_REGION)
 bedrock_agent_runtime = boto3.client("bedrock-agent-runtime", region_name=AWS_REGION)

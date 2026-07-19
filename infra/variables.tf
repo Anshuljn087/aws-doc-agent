@@ -27,3 +27,15 @@ variable "kb_id" {
   type        = string
   default     = "AQJ8REZKK9"
 }
+
+variable "model_id" {
+  description = "Bedrock model/inference-profile ID used for generation"
+  type        = string
+  default     = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+}
+
+variable "ssh_public_key_path" {
+  description = "Path to the local SSH public key to install on the EC2 instance"
+  type        = string
+  default     = "~/.ssh/id_ed25519.pub"
+}

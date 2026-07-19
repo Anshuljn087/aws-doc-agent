@@ -99,12 +99,18 @@ resource "aws_iam_instance_profile" "ec2_bedrock_access" {
   role = aws_iam_role.ec2_bedrock_access.name
 }
 
+resource "aws_key_pair" "backend" {
+  key_name   = "aws-doc-agent-backend-key"
+  public_key = file(pathexpand(var.ssh_public_key_path))
+}
+
 resource "aws_instance" "backend" {
   ami                    = data.aws_ami.al2023.id
   instance_type          = "t3.micro"
   subnet_id              = data.aws_subnets.default.ids[0]
   vpc_security_group_ids = [aws_security_group.backend.id]
   iam_instance_profile   = aws_iam_instance_profile.ec2_bedrock_access.name
+  key_name               = aws_key_pair.backend.key_name
 
   user_data = <<EOF
 #!/bin/bash
@@ -122,6 +128,7 @@ python3.11 -m venv venv
 cat > /opt/aws-doc-agent/.env <<ENVEOF
 KB_ID=${var.kb_id}
 AWS_REGION=${var.aws_region}
+MODEL_ID=${var.model_id}
 ENVEOF
 
 cat > /etc/systemd/system/aws-doc-agent.service <<'UNITEOF'
