@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import time
 from pathlib import Path
 from typing import List, Dict, Any
@@ -67,17 +68,25 @@ def _load_local_docs() -> List[Dict[str, Any]]:
     return results
 
 
+_STOPWORDS = {
+    "a", "an", "the", "is", "are", "am", "was", "were", "be", "been",
+    "what", "how", "does", "do", "did", "with", "and", "or", "to", "of",
+    "in", "on", "for", "it", "this", "that", "i", "you", "we", "can",
+}
+
+
+def _tokenize(text: str) -> set[str]:
+    return {token for token in re.findall(r"[a-z0-9]+", text.lower()) if len(token) > 1 and token not in _STOPWORDS}
+
+
 def _rank_local_docs(query: str, docs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    query_tokens = {token for token in query.lower().replace("-", " ").split() if token}
+    query_tokens = _tokenize(query)
     ranked: List[Dict[str, Any]] = []
     for doc in docs:
         text = doc.get("content", {}).get("text", "")
-        text_lower = text.lower()
-        score = 0
-        for token in query_tokens:
-            if token in text_lower:
-                score += 1
-        if score > 0 or any(keyword in text_lower for keyword in ["s3", "lambda", "iam", "ec2", "vpc", "dynamodb", "api", "cloudwatch", "bedrock"]):
+        doc_tokens = _tokenize(text)
+        score = len(query_tokens & doc_tokens)
+        if score > 0:
             ranked.append({**doc, "_score": score})
     ranked.sort(key=lambda item: item["_score"], reverse=True)
     return ranked
@@ -92,7 +101,7 @@ def _answer_from_local_docs(query: str, docs: List[Dict[str, Any]]) -> str:
         if "enable" in query_lower and "to enable" in text.lower():
             return text.split("To enable", 1)[1].split("\n\n", 1)[0].strip()
         if any(token in text.lower() for token in ["versioning", "lambda", "iam", "vpc", "dynamodb", "cloudwatch", "bedrock"]):
-            paragraphs = [part.strip() for part in text.split("\n\n") if part.strip()]
+            paragraphs = [part.strip() for part in text.split("\n\n") if part.strip() and not part.strip().startswith("#")]
             if paragraphs:
                 return paragraphs[0]
     return "I could not find a suitable local documentation answer for that question."

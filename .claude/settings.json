@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Bash(ls -la ~/.ssh/ 2>&1)",
+      "Read(//c/Users/Lenovo/.ssh/**)"
+    ]
+  }
+}
